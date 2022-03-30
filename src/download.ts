@@ -1,35 +1,32 @@
+import extract from 'extract-zip'
+import fetch from 'node-fetch'
 import fs from 'fs'
-import https from 'https'
-import unzipper from 'unzipper'
+import path from 'path'
 
 export async function downloadFile(
   url: string,
-  path: string,
+  dest: string,
   token: string
 ): Promise<void> {
-  const fileStream = fs.createWriteStream(path)
+  const response = await fetch(url, {
+    headers: { Authorization: `token ${token}` }
+  })
+
+  if (!response.ok || !response.body) {
+    throw Error('Response was invalid')
+  }
 
   return new Promise((resolve, reject) => {
-    https.get(
-      url,
-      { headers: { Authorization: `token ${token}` } },
-      (response) => {
-        response.pipe(fileStream)
-        response.on('error', reject)
-        fileStream.on('finish', resolve)
-      }
-    )
+    const file = fs.createWriteStream(dest)
+
+    response.body?.pipe(file)
+    response.body?.on('error', reject)
+    response.body?.on('finish', resolve)
   })
 }
 
 export async function unzipFile(src: string, dest: string): Promise<void> {
-  const readStream = fs.createReadStream(src)
-
-  return new Promise((resolve, reject) => {
-    const parseStream = readStream.pipe(unzipper.Extract({ path: dest }))
-    parseStream.on('error', reject)
-    parseStream.on('finish', resolve)
-  })
+  return extract(src, { dir: dest })
 }
 
 async function test(): Promise<void> {
@@ -39,10 +36,10 @@ async function test(): Promise<void> {
     await downloadFile(
       'https://api.github.com/repos/phocassoftware/fs-app/actions/artifacts/181787408/zip',
       ZIP_PATH,
-      process.env.GITHUB_TOKEN_PSW || ''
+      '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'
     )
 
-    await unzipFile(ZIP_PATH, 'temp')
+    await unzipFile(ZIP_PATH, path.join(path.resolve(), 'temp'))
   } catch (err) {
     console.error(err)
   }
