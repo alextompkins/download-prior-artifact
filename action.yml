@@ -1,11 +1,11 @@
-name: 'Your name here'
-description: 'Provide a description here'
-author: 'Your name or organization here'
+name: 'Download Prior Artifact'
+description: 'Download an artifact from any prior workflow run of a given repository'
+author: 'Alex Tompkins'
 inputs:
-  milliseconds: # change this
+  repo:
     required: true
-    description: 'input description here'
-    default: 'default value if applicable'
+    description: 'repository to search for artifacts'
+    default: 'repo this action is running in'
 runs:
   using: 'node16'
   main: 'dist/index.js'

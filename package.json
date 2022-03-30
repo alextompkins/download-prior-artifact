@@ -2,7 +2,7 @@
   "name": "download-prior-artifact",
   "version": "0.0.1",
   "private": true,
-  "description": "Downloads an artifact from any workflow run of a repository",
+  "description": "Download an artifact from any prior workflow run of a given repository",
   "main": "lib/main.js",
   "scripts": {
     "build": "tsc",
