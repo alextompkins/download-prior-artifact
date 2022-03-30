@@ -1,0 +1,20 @@
+name: Upload an artifact to use for testing
+
+on:
+  workflow_dispatch:
+    inputs:
+      artifact_name:
+        type: string
+        description: Artifact name
+        required: true
+
+jobs:
+  upload-artifact:
+    runs-on: ubuntu-latest
+    steps:
+      - run: echo 'Blah blah blah' > ${{ github.event.inputs.artifact_name }}
+
+      - uses: actions/upload-artifact@v3
+        with:
+          name: ${{ github.event.inputs.artifact_name }}
+          path: ${{ github.event.inputs.artifact_name }}

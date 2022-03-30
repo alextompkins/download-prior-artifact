@@ -13,8 +13,10 @@ export function getConfig(): ActionConfig {
   const token = process.env.GITHUB_TOKEN
 
   if (!token) {
-    core.setFailed('You must provide GITHUB_TOKEN as an env var to this action')
-    throw Error('token input is missing')
+    core.setFailed(
+      'You must provide GITHUB_TOKEN as an env var to this action.'
+    )
+    throw Error('GitHub API token is missing')
   }
 
   return {
