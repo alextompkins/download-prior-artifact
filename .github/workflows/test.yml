@@ -24,4 +24,4 @@ jobs:
           name: test-artifact-v0.0.1
           path: artifacts
         env:
-          GITHUB_TOKEN: ${{ secrets.ACTION_GITHUB_TOKEN }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
