@@ -1,16 +1,37 @@
 import * as core from '@actions/core'
-import { wait } from './wait'
+import * as github from '@actions/github'
+import { getConfig } from './action'
+import { downloadFile, unzipFile } from './download'
+
+const ARTIFACT_DOWNLOAD_PATH = 'temp/artifact.zip'
 
 async function run(): Promise<void> {
   try {
-    const ms: string = core.getInput('milliseconds')
-    core.debug(`Waiting ${ms} milliseconds ...`) // debug is only output if you set the secret `ACTIONS_STEP_DEBUG` to true
+    const { name, path, owner, repo, token } = getConfig()
+    const octokit = github.getOctokit(token)
 
-    core.debug(new Date().toTimeString())
-    await wait(parseInt(ms, 10))
-    core.debug(new Date().toTimeString())
+    const res = await octokit.rest.actions.listArtifactsForRepo({
+      owner,
+      repo
+    })
 
-    core.setOutput('time', new Date().toTimeString())
+    if (res.status !== 200) {
+      throw Error(`The github API returned a non-success code: ${res.status}`)
+    }
+
+    const artifacts = res.data.artifacts
+    const matching = artifacts.find((artifact) => artifact.name === name)
+
+    if (!matching) {
+      throw Error(`No artifact found in ${owner}/${repo} with name '${name}'`)
+    }
+
+    await downloadFile(
+      matching.archive_download_url,
+      ARTIFACT_DOWNLOAD_PATH,
+      token
+    )
+    await unzipFile(ARTIFACT_DOWNLOAD_PATH, path)
   } catch (error) {
     if (error instanceof Error) core.setFailed(error.message)
   }

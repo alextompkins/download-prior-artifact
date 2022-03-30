@@ -5,10 +5,20 @@ branding:
   icon: download-cloud
   color: purple
 inputs:
-  repo:
+  name:
     required: true
-    description: 'repository to search for artifacts'
-    default: 'repo this action is running in'
+    description: 'Artifact name'
+  path:
+    required: true
+    description: 'Destination path'
+  repo:
+    required: false
+    description: 'Repository to search'
+    default: 'Repo this action is running in'
+  owner:
+    required: false
+    description: 'Repository owner'
+    default: 'Owner of the repo this action is running in'
 runs:
   using: 'node16'
   main: 'dist/index.js'
