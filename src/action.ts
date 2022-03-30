@@ -1,10 +1,8 @@
 import * as core from '@actions/core'
-import * as github from '@actions/github'
 
 export interface ActionConfig {
   name: string
   path: string
-  owner: string
   repo: string
   token: string
 }
@@ -22,8 +20,7 @@ export function getConfig(): ActionConfig {
   return {
     name: core.getInput('name', { required: true }),
     path: core.getInput('path', { required: true }),
-    owner: core.getInput('owner') || github.context.repo.owner,
-    repo: core.getInput('repo') || github.context.repo.repo,
+    repo: core.getInput('repo', { required: true }),
     token
   }
 }

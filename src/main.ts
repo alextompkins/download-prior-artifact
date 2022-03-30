@@ -7,12 +7,14 @@ const ARTIFACT_DOWNLOAD_PATH = 'temp/artifact.zip'
 
 async function run(): Promise<void> {
   try {
-    const { name, path, owner, repo, token } = getConfig()
+    const { name, path, repo, token } = getConfig()
     const octokit = github.getOctokit(token)
+
+    const [owner, repoName] = repo.split('/')
 
     const res = await octokit.rest.actions.listArtifactsForRepo({
       owner,
-      repo
+      repo: repoName
     })
 
     if (res.status !== 200) {
@@ -23,7 +25,7 @@ async function run(): Promise<void> {
     const matching = artifacts.find((artifact) => artifact.name === name)
 
     if (!matching) {
-      throw Error(`No artifact found in ${owner}/${repo} with name '${name}'`)
+      throw Error(`No artifact found in ${repo} with name '${name}'`)
     }
     core.debug(`Found artifact.`)
 

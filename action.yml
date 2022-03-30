@@ -14,11 +14,7 @@ inputs:
   repo:
     required: false
     description: 'Repository to search'
-    default: 'Repo this action is running in'
-  owner:
-    required: false
-    description: 'Repository owner'
-    default: 'Owner of the repo this action is running in'
+    default: ${{ github.repository }}
 runs:
   using: 'node16'
   main: 'dist/index.js'
