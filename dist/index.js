@@ -28,18 +28,16 @@ var __importStar = (this && this.__importStar) || function (mod) {
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.getConfig = void 0;
 const core = __importStar(__nccwpck_require__(2186));
-const github = __importStar(__nccwpck_require__(5438));
 function getConfig() {
     const token = process.env.GITHUB_TOKEN;
     if (!token) {
-        core.setFailed('You must provide GITHUB_TOKEN as an env var to this action');
-        throw Error('token input is missing');
+        core.setFailed('You must provide GITHUB_TOKEN as an env var to this action.');
+        throw Error('GitHub API token is missing');
     }
     return {
         name: core.getInput('name', { required: true }),
         path: core.getInput('path', { required: true }),
-        owner: core.getInput('owner') || github.context.repo.owner,
-        repo: core.getInput('repo') || github.context.repo.repo,
+        repo: core.getInput('repo', { required: true }),
         token
     };
 }
@@ -141,11 +139,12 @@ const ARTIFACT_DOWNLOAD_PATH = 'temp/artifact.zip';
 function run() {
     return __awaiter(this, void 0, void 0, function* () {
         try {
-            const { name, path, owner, repo, token } = (0, action_1.getConfig)();
+            const { name, path, repo, token } = (0, action_1.getConfig)();
             const octokit = github.getOctokit(token);
+            const [owner, repoName] = repo.split('/');
             const res = yield octokit.rest.actions.listArtifactsForRepo({
                 owner,
-                repo
+                repo: repoName
             });
             if (res.status !== 200) {
                 throw Error(`The github API returned a non-success code: ${res.status}`);
@@ -153,7 +152,7 @@ function run() {
             const artifacts = res.data.artifacts;
             const matching = artifacts.find((artifact) => artifact.name === name);
             if (!matching) {
-                throw Error(`No artifact found in ${owner}/${repo} with name '${name}'`);
+                throw Error(`No artifact found in ${repo} with name '${name}'`);
             }
             core.debug(`Found artifact.`);
             core.debug(`Downloading artifact from ${matching.archive_download_url}...`);
