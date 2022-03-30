@@ -3,11 +3,9 @@ import * as github from '@actions/github'
 import { downloadFile, unzipFile } from './download'
 import { getConfig } from './action'
 
-const ARTIFACT_DOWNLOAD_PATH = 'temp/artifact.zip'
-
 async function run(): Promise<void> {
   try {
-    const { name, path, repo, token } = getConfig()
+    const { name, path, repo, token, tempDir } = getConfig()
     const octokit = github.getOctokit(token)
 
     const [owner, repoName] = repo.split('/')
@@ -29,14 +27,13 @@ async function run(): Promise<void> {
     }
     core.debug(`Found artifact.`)
 
+    const zipDownloadPath = `${tempDir}/artifact.zip`
+
     core.debug(`Downloading artifact from ${matching.archive_download_url}...`)
-    await downloadFile(
-      matching.archive_download_url,
-      ARTIFACT_DOWNLOAD_PATH,
-      token
-    )
+    await downloadFile(matching.archive_download_url, zipDownloadPath, token)
+
     core.debug(`Unzipping artifact...`)
-    await unzipFile(ARTIFACT_DOWNLOAD_PATH, path)
+    await unzipFile(zipDownloadPath, path)
 
     core.debug(`Success.`)
   } catch (error) {

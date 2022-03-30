@@ -34,11 +34,16 @@ function getConfig() {
         core.setFailed('You must provide GITHUB_TOKEN as an env var to this action.');
         throw Error('GitHub API token is missing');
     }
+    const tempDir = process.env.RUNNER_TEMP;
+    if (!tempDir) {
+        throw Error('RUNNER_TEMP is not available to this action.');
+    }
     return {
         name: core.getInput('name', { required: true }),
         path: core.getInput('path', { required: true }),
         repo: core.getInput('repo', { required: true }),
-        token
+        token,
+        tempDir
     };
 }
 exports.getConfig = getConfig;
@@ -135,11 +140,10 @@ const core = __importStar(__nccwpck_require__(2186));
 const github = __importStar(__nccwpck_require__(5438));
 const download_1 = __nccwpck_require__(5933);
 const action_1 = __nccwpck_require__(9139);
-const ARTIFACT_DOWNLOAD_PATH = 'temp/artifact.zip';
 function run() {
     return __awaiter(this, void 0, void 0, function* () {
         try {
-            const { name, path, repo, token } = (0, action_1.getConfig)();
+            const { name, path, repo, token, tempDir } = (0, action_1.getConfig)();
             const octokit = github.getOctokit(token);
             const [owner, repoName] = repo.split('/');
             const res = yield octokit.rest.actions.listArtifactsForRepo({
@@ -155,10 +159,11 @@ function run() {
                 throw Error(`No artifact found in ${repo} with name '${name}'`);
             }
             core.debug(`Found artifact.`);
+            const zipDownloadPath = `${tempDir}/artifact.zip`;
             core.debug(`Downloading artifact from ${matching.archive_download_url}...`);
-            yield (0, download_1.downloadFile)(matching.archive_download_url, ARTIFACT_DOWNLOAD_PATH, token);
+            yield (0, download_1.downloadFile)(matching.archive_download_url, zipDownloadPath, token);
             core.debug(`Unzipping artifact...`);
-            yield (0, download_1.unzipFile)(ARTIFACT_DOWNLOAD_PATH, path);
+            yield (0, download_1.unzipFile)(zipDownloadPath, path);
             core.debug(`Success.`);
         }
         catch (error) {

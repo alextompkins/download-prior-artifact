@@ -5,6 +5,7 @@ export interface ActionConfig {
   path: string
   repo: string
   token: string
+  tempDir: string
 }
 
 export function getConfig(): ActionConfig {
@@ -17,10 +18,17 @@ export function getConfig(): ActionConfig {
     throw Error('GitHub API token is missing')
   }
 
+  const tempDir = process.env.RUNNER_TEMP
+
+  if (!tempDir) {
+    throw Error('RUNNER_TEMP is not available to this action.')
+  }
+
   return {
     name: core.getInput('name', { required: true }),
     path: core.getInput('path', { required: true }),
     repo: core.getInput('repo', { required: true }),
-    token
+    token,
+    tempDir
   }
 }
