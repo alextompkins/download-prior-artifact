@@ -26,6 +26,8 @@ steps:
     with:
       name: my-artifact-id-123
       path: path/to/artifact
+    env:
+      GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
   - name: Display structure of downloaded files
     run: ls -R
