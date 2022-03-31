@@ -25,17 +25,17 @@ async function run(): Promise<void> {
     if (!matching) {
       throw Error(`No artifact found in ${repo} with name '${name}'`)
     }
-    core.debug(`Found artifact.`)
+    core.info(`Found artifact.`)
 
     const zipDownloadPath = `${tempDir}/artifact.zip`
 
-    core.debug(`Downloading artifact from ${matching.archive_download_url}...`)
+    core.info(`Downloading artifact from ${matching.archive_download_url}...`)
     await downloadFile(matching.archive_download_url, zipDownloadPath, token)
 
-    core.debug(`Unzipping artifact...`)
+    core.info(`Unzipping artifact ${zipDownloadPath} to ${path}...`)
     await unzipFile(zipDownloadPath, path)
 
-    core.debug(`Success.`)
+    core.info(`Success.`)
   } catch (error) {
     if (error instanceof Error) core.setFailed(error.message)
   }

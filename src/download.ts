@@ -1,3 +1,4 @@
+import * as core from '@actions/core'
 import extract from 'extract-zip'
 import fetch from 'node-fetch'
 import fs from 'fs'
@@ -13,7 +14,7 @@ export async function downloadFile(
   })
 
   if (!response.ok || !response.body) {
-    throw Error('Response was invalid')
+    throw Error('GitHub API response was invalid')
   }
 
   return new Promise((resolve, reject) => {
@@ -26,5 +27,16 @@ export async function downloadFile(
 }
 
 export async function unzipFile(src: string, dest: string): Promise<void> {
-  return extract(src, { dir: path.join(path.resolve(), dest) })
+  const dir = path.join(path.resolve(), dest)
+  core.info(`Absolute path to dest: ${dir}`)
+
+  return extract(src, {
+    dir,
+    onEntry: (entry) =>
+      core.info(
+        `Extracting ${entry.fileName} (${(
+          entry.uncompressedSize / 1000
+        ).toFixed(1)}kB)`
+      )
+  })
 }

@@ -1,6 +1,6 @@
 {
   "name": "download-prior-artifact",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "private": true,
   "description": "Download an artifact from any prior workflow run of a given repository",
   "main": "lib/main.js",

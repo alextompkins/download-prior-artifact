@@ -56,6 +56,25 @@ exports.getConfig = getConfig;
 
 "use strict";
 
+var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    Object.defineProperty(o, k2, { enumerable: true, get: function() { return m[k]; } });
+}) : (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    o[k2] = m[k];
+}));
+var __setModuleDefault = (this && this.__setModuleDefault) || (Object.create ? (function(o, v) {
+    Object.defineProperty(o, "default", { enumerable: true, value: v });
+}) : function(o, v) {
+    o["default"] = v;
+});
+var __importStar = (this && this.__importStar) || function (mod) {
+    if (mod && mod.__esModule) return mod;
+    var result = {};
+    if (mod != null) for (var k in mod) if (k !== "default" && Object.prototype.hasOwnProperty.call(mod, k)) __createBinding(result, mod, k);
+    __setModuleDefault(result, mod);
+    return result;
+};
 var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
     function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
     return new (P || (P = Promise))(function (resolve, reject) {
@@ -70,6 +89,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.unzipFile = exports.downloadFile = void 0;
+const core = __importStar(__nccwpck_require__(2186));
 const extract_zip_1 = __importDefault(__nccwpck_require__(460));
 const node_fetch_1 = __importDefault(__nccwpck_require__(467));
 const fs_1 = __importDefault(__nccwpck_require__(5747));
@@ -80,7 +100,7 @@ function downloadFile(url, dest, token) {
             headers: { Authorization: `token ${token}` }
         });
         if (!response.ok || !response.body) {
-            throw Error('Response was invalid');
+            throw Error('GitHub API response was invalid');
         }
         return new Promise((resolve, reject) => {
             var _a, _b, _c;
@@ -94,7 +114,12 @@ function downloadFile(url, dest, token) {
 exports.downloadFile = downloadFile;
 function unzipFile(src, dest) {
     return __awaiter(this, void 0, void 0, function* () {
-        return (0, extract_zip_1.default)(src, { dir: path_1.default.join(path_1.default.resolve(), dest) });
+        const dir = path_1.default.join(path_1.default.resolve(), dest);
+        core.info(`Absolute path to dest: ${dir}`);
+        return (0, extract_zip_1.default)(src, {
+            dir,
+            onEntry: (entry) => core.info(`Extracting ${entry.fileName} (${(entry.uncompressedSize / 1000).toFixed(1)}kB)`)
+        });
     });
 }
 exports.unzipFile = unzipFile;
@@ -158,13 +183,13 @@ function run() {
             if (!matching) {
                 throw Error(`No artifact found in ${repo} with name '${name}'`);
             }
-            core.debug(`Found artifact.`);
+            core.info(`Found artifact.`);
             const zipDownloadPath = `${tempDir}/artifact.zip`;
-            core.debug(`Downloading artifact from ${matching.archive_download_url}...`);
+            core.info(`Downloading artifact from ${matching.archive_download_url}...`);
             yield (0, download_1.downloadFile)(matching.archive_download_url, zipDownloadPath, token);
-            core.debug(`Unzipping artifact...`);
+            core.info(`Unzipping artifact ${zipDownloadPath} to ${path}...`);
             yield (0, download_1.unzipFile)(zipDownloadPath, path);
-            core.debug(`Success.`);
+            core.info(`Success.`);
         }
         catch (error) {
             if (error instanceof Error)
