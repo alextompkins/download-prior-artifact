@@ -15,6 +15,9 @@ inputs:
     required: false
     description: 'Repository to search'
     default: ${{ github.repository }}
+  commitHash:
+    required: false
+    description: 'Filter to Artifacts tied to a commit, and can be a partial hash'
 runs:
   using: 'node16'
   main: 'dist/index.js'

@@ -4,6 +4,7 @@ export interface ActionConfig {
   name: string
   path: string
   repo: string
+  commitHash: string
   token: string
   tempDir: string
 }
@@ -28,6 +29,7 @@ export function getConfig(): ActionConfig {
     name: core.getInput('name', { required: true }),
     path: core.getInput('path', { required: true }),
     repo: core.getInput('repo', { required: true }),
+    commitHash: core.getInput('commitHash', { required: false }),
     token,
     tempDir
   }

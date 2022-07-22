@@ -5,7 +5,7 @@ import { getConfig } from './action'
 
 async function run(): Promise<void> {
   try {
-    const { name, path, repo, token, tempDir } = getConfig()
+    const { name, path, repo, commitHash, token, tempDir } = getConfig()
     const octokit = github.getOctokit(token)
 
     const [owner, repoName] = repo.split('/')
@@ -19,7 +19,12 @@ async function run(): Promise<void> {
       throw Error(`The github API returned a non-success code: ${res.status}`)
     }
 
-    const artifacts = res.data.artifacts
+    let artifacts = res.data.artifacts
+    if (commitHash) {
+      artifacts = artifacts.filter((artifact) =>
+        artifact.workflow_run?.head_sha?.startsWith(commitHash)
+      )
+    }
     const matching = artifacts.find((artifact) => artifact.name === name)
 
     if (!matching) {
