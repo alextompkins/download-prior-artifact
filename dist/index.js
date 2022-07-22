@@ -100,8 +100,8 @@ exports.unzipFile = exports.downloadFile = void 0;
 const core = __importStar(__nccwpck_require__(2186));
 const extract_zip_1 = __importDefault(__nccwpck_require__(460));
 const node_fetch_1 = __importDefault(__nccwpck_require__(4429));
-const fs_1 = __importDefault(__nccwpck_require__(7147));
-const path_1 = __importDefault(__nccwpck_require__(1017));
+const fs = __importStar(__nccwpck_require__(7561));
+const path = __importStar(__nccwpck_require__(9411));
 function downloadFile(url, dest, token) {
     return __awaiter(this, void 0, void 0, function* () {
         const response = yield (0, node_fetch_1.default)(url, {
@@ -112,7 +112,7 @@ function downloadFile(url, dest, token) {
         }
         return new Promise((resolve, reject) => {
             var _a, _b, _c;
-            const file = fs_1.default.createWriteStream(dest);
+            const file = fs.createWriteStream(dest);
             (_a = response.body) === null || _a === void 0 ? void 0 : _a.pipe(file);
             (_b = response.body) === null || _b === void 0 ? void 0 : _b.on('error', reject);
             (_c = response.body) === null || _c === void 0 ? void 0 : _c.on('finish', resolve);
@@ -122,7 +122,7 @@ function downloadFile(url, dest, token) {
 exports.downloadFile = downloadFile;
 function unzipFile(src, dest) {
     return __awaiter(this, void 0, void 0, function* () {
-        const dir = path_1.default.join(path_1.default.resolve(), dest);
+        const dir = path.join(path.resolve(), dest);
         core.info(`Absolute path to dest: ${dir}`);
         return (0, extract_zip_1.default)(src, {
             dir,
@@ -179,37 +179,32 @@ const download_1 = __nccwpck_require__(5933);
 const action_1 = __nccwpck_require__(9139);
 function run() {
     return __awaiter(this, void 0, void 0, function* () {
-        try {
-            const { name, path, repo, token, tempDir } = (0, action_1.getConfig)();
-            const octokit = github.getOctokit(token);
-            const [owner, repoName] = repo.split('/');
-            const res = yield octokit.rest.actions.listArtifactsForRepo({
-                owner,
-                repo: repoName
-            });
-            if (res.status !== 200) {
-                throw Error(`The github API returned a non-success code: ${res.status}`);
-            }
-            const artifacts = res.data.artifacts;
-            const matching = artifacts.find((artifact) => artifact.name === name);
-            if (!matching) {
-                throw Error(`No artifact found in ${repo} with name '${name}'`);
-            }
-            core.info(`Found artifact.`);
-            const zipDownloadPath = `${tempDir}/artifact.zip`;
-            core.info(`Downloading artifact from ${matching.archive_download_url}...`);
-            yield (0, download_1.downloadFile)(matching.archive_download_url, zipDownloadPath, token);
-            core.info(`Unzipping artifact ${zipDownloadPath} to ${path}...`);
-            yield (0, download_1.unzipFile)(zipDownloadPath, path);
-            core.info(`Success.`);
+        const { name, path, repo, token, tempDir } = (0, action_1.getConfig)();
+        const octokit = github.getOctokit(token);
+        const [owner, repoName] = repo.split('/');
+        const res = yield octokit.rest.actions.listArtifactsForRepo({
+            owner,
+            repo: repoName
+        });
+        if (res.status !== 200) {
+            throw Error(`The github API returned a non-success code: ${res.status}`);
         }
-        catch (error) {
-            if (error instanceof Error)
-                core.setFailed(error.message);
+        const artifacts = res.data.artifacts;
+        const matching = artifacts.find((artifact) => artifact.name === name);
+        if (!matching) {
+            throw Error(`No artifact found in ${repo} with name '${name}'`);
         }
+        core.info(`Found artifact.`);
+        const zipDownloadPath = `${tempDir}/artifact.zip`;
+        core.info(`Downloading artifact from ${matching.archive_download_url}...`);
+        yield (0, download_1.downloadFile)(matching.archive_download_url, zipDownloadPath, token);
+        core.info(`Unzipping artifact ${zipDownloadPath} to ${path}...`);
+        yield (0, download_1.unzipFile)(zipDownloadPath, path);
+        core.info(`Success.`);
     });
 }
-run();
+// eslint-disable-next-line github/no-then
+run().catch((error) => core.setFailed(error.message));
 
 
 /***/ }),
@@ -16238,6 +16233,22 @@ module.exports = require("net");
 
 /***/ }),
 
+/***/ 7561:
+/***/ ((module) => {
+
+"use strict";
+module.exports = require("node:fs");
+
+/***/ }),
+
+/***/ 9411:
+/***/ ((module) => {
+
+"use strict";
+module.exports = require("node:path");
+
+/***/ }),
+
 /***/ 7742:
 /***/ ((module) => {
 
@@ -16454,34 +16465,23 @@ const File = _File
 
 /***/ }),
 
-/***/ 2777:
+/***/ 2185:
 /***/ ((__unused_webpack___webpack_module__, __webpack_exports__, __nccwpck_require__) => {
 
 "use strict";
-
-// EXPORTS
-__nccwpck_require__.d(__webpack_exports__, {
-  "t6": () => (/* reexport */ fetch_blob/* default */.Z),
-  "$B": () => (/* reexport */ file/* default */.Z),
-  "xB": () => (/* binding */ blobFrom),
-  "SX": () => (/* binding */ blobFromSync),
-  "e2": () => (/* binding */ fileFrom),
-  "RA": () => (/* binding */ fileFromSync)
-});
-
-// UNUSED EXPORTS: default
-
-;// CONCATENATED MODULE: external "node:fs"
-const external_node_fs_namespaceObject = require("node:fs");
-;// CONCATENATED MODULE: external "node:path"
-const external_node_path_namespaceObject = require("node:path");
-// EXTERNAL MODULE: ./node_modules/node-domexception/index.js
-var node_domexception = __nccwpck_require__(7760);
-// EXTERNAL MODULE: ./node_modules/fetch-blob/file.js
-var file = __nccwpck_require__(3213);
-// EXTERNAL MODULE: ./node_modules/fetch-blob/index.js
-var fetch_blob = __nccwpck_require__(1410);
-;// CONCATENATED MODULE: ./node_modules/fetch-blob/from.js
+/* harmony export */ __nccwpck_require__.d(__webpack_exports__, {
+/* harmony export */   "$B": () => (/* reexport safe */ _file_js__WEBPACK_IMPORTED_MODULE_3__.Z),
+/* harmony export */   "t6": () => (/* reexport safe */ _index_js__WEBPACK_IMPORTED_MODULE_4__.Z),
+/* harmony export */   "xB": () => (/* binding */ blobFrom),
+/* harmony export */   "SX": () => (/* binding */ blobFromSync),
+/* harmony export */   "e2": () => (/* binding */ fileFrom),
+/* harmony export */   "RA": () => (/* binding */ fileFromSync)
+/* harmony export */ });
+/* harmony import */ var node_fs__WEBPACK_IMPORTED_MODULE_0__ = __nccwpck_require__(7561);
+/* harmony import */ var node_path__WEBPACK_IMPORTED_MODULE_1__ = __nccwpck_require__(9411);
+/* harmony import */ var node_domexception__WEBPACK_IMPORTED_MODULE_2__ = __nccwpck_require__(7760);
+/* harmony import */ var _file_js__WEBPACK_IMPORTED_MODULE_3__ = __nccwpck_require__(3213);
+/* harmony import */ var _index_js__WEBPACK_IMPORTED_MODULE_4__ = __nccwpck_require__(1410);
 
 
 
@@ -16489,13 +16489,13 @@ var fetch_blob = __nccwpck_require__(1410);
 
 
 
-const { stat } = external_node_fs_namespaceObject.promises
+const { stat } = node_fs__WEBPACK_IMPORTED_MODULE_0__.promises
 
 /**
  * @param {string} path filepath on the disk
  * @param {string} [type] mimetype to use
  */
-const blobFromSync = (path, type) => fromBlob((0,external_node_fs_namespaceObject.statSync)(path), path, type)
+const blobFromSync = (path, type) => fromBlob((0,node_fs__WEBPACK_IMPORTED_MODULE_0__.statSync)(path), path, type)
 
 /**
  * @param {string} path filepath on the disk
@@ -16515,10 +16515,10 @@ const fileFrom = (path, type) => stat(path).then(stat => fromFile(stat, path, ty
  * @param {string} path filepath on the disk
  * @param {string} [type] mimetype to use
  */
-const fileFromSync = (path, type) => fromFile((0,external_node_fs_namespaceObject.statSync)(path), path, type)
+const fileFromSync = (path, type) => fromFile((0,node_fs__WEBPACK_IMPORTED_MODULE_0__.statSync)(path), path, type)
 
 // @ts-ignore
-const fromBlob = (stat, path, type = '') => new fetch_blob/* default */.Z([new BlobDataItem({
+const fromBlob = (stat, path, type = '') => new _index_js__WEBPACK_IMPORTED_MODULE_4__/* ["default"] */ .Z([new BlobDataItem({
   path,
   size: stat.size,
   lastModified: stat.mtimeMs,
@@ -16526,12 +16526,12 @@ const fromBlob = (stat, path, type = '') => new fetch_blob/* default */.Z([new B
 })], { type })
 
 // @ts-ignore
-const fromFile = (stat, path, type = '') => new file/* default */.Z([new BlobDataItem({
+const fromFile = (stat, path, type = '') => new _file_js__WEBPACK_IMPORTED_MODULE_3__/* ["default"] */ .Z([new BlobDataItem({
   path,
   size: stat.size,
   lastModified: stat.mtimeMs,
   start: 0
-})], (0,external_node_path_namespaceObject.basename)(path), { type, lastModified: stat.mtimeMs })
+})], (0,node_path__WEBPACK_IMPORTED_MODULE_1__.basename)(path), { type, lastModified: stat.mtimeMs })
 
 /**
  * This is a blob backed up by a file on the disk
@@ -16567,9 +16567,9 @@ class BlobDataItem {
   async * stream () {
     const { mtimeMs } = await stat(this.#path)
     if (mtimeMs > this.lastModified) {
-      throw new node_domexception('The requested file could not be read, typically due to permission problems that have occurred after a reference to a file was acquired.', 'NotReadableError')
+      throw new node_domexception__WEBPACK_IMPORTED_MODULE_2__('The requested file could not be read, typically due to permission problems that have occurred after a reference to a file was acquired.', 'NotReadableError')
     }
-    yield * (0,external_node_fs_namespaceObject.createReadStream)(this.#path, {
+    yield * (0,node_fs__WEBPACK_IMPORTED_MODULE_0__.createReadStream)(this.#path, {
       start: this.#start,
       end: this.#start + this.size - 1
     })
@@ -16580,7 +16580,7 @@ class BlobDataItem {
   }
 }
 
-/* harmony default export */ const from = ((/* unused pure expression or super */ null && (blobFromSync)));
+/* unused harmony default export */ var __WEBPACK_DEFAULT_EXPORT__ = ((/* unused pure expression or super */ null && (blobFromSync)));
 
 
 
@@ -18645,8 +18645,8 @@ class AbortError extends FetchBaseError {
 	}
 }
 
-// EXTERNAL MODULE: ./node_modules/fetch-blob/from.js + 2 modules
-var from = __nccwpck_require__(2777);
+// EXTERNAL MODULE: ./node_modules/fetch-blob/from.js
+var from = __nccwpck_require__(2185);
 ;// CONCATENATED MODULE: ./node_modules/node-fetch/src/index.js
 /**
  * Index.js
