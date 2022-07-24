@@ -1,8 +1,8 @@
 import * as core from '@actions/core'
 import extract from 'extract-zip'
 import fetch from 'node-fetch'
-import fs from 'fs'
-import path from 'path'
+import * as fs from 'node:fs'
+import * as path from 'node:path'
 
 export async function downloadFile(
   url: string,
