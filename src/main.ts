@@ -2,9 +2,10 @@ import * as core from '@actions/core'
 import * as github from '@actions/github'
 import { downloadFile, unzipFile } from './download'
 import { getConfig } from './action'
+import { missingTypes } from './missing-types'
 
 async function run(): Promise<void> {
-  const { name, path, repo, token, tempDir } = getConfig()
+  const { name, path, repo, commitHash, token, tempDir } = getConfig()
   const octokit = github.getOctokit(token)
 
   const [owner, repoName] = repo.split('/')
@@ -18,7 +19,12 @@ async function run(): Promise<void> {
     throw Error(`The github API returned a non-success code: ${res.status}`)
   }
 
-  const artifacts = res.data.artifacts
+  let artifacts = res.data.artifacts as missingTypes["artifacts"]
+  if (commitHash) {
+    artifacts = artifacts.filter((artifact) =>
+      artifact.workflow_run?.head_sha?.startsWith(commitHash)
+    )
+  }
   const matching = artifacts.find((artifact) => artifact.name === name)
 
   if (!matching) {
