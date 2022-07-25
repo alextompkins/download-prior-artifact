@@ -2,6 +2,7 @@ import * as core from '@actions/core'
 import * as github from '@actions/github'
 import { downloadFile, unzipFile } from './download'
 import { getConfig } from './action'
+// eslint-disable-next-line import/no-unresolved
 import { missingTypes } from './missing-types'
 
 async function run(): Promise<void> {
@@ -19,7 +20,7 @@ async function run(): Promise<void> {
     throw Error(`The github API returned a non-success code: ${res.status}`)
   }
 
-  let artifacts = res.data.artifacts as missingTypes["artifacts"]
+  let artifacts = res.data.artifacts as missingTypes['artifacts']
   if (commitHash) {
     artifacts = artifacts.filter((artifact) =>
       artifact.workflow_run?.head_sha?.startsWith(commitHash)
