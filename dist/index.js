@@ -46,6 +46,7 @@ function getConfig() {
         name: core.getInput('name', { required: true }),
         path: core.getInput('path', { required: true }),
         repo: core.getInput('repo', { required: true }),
+        commitHash: core.getInput('commitHash', { required: false }) || undefined,
         token,
         tempDir
     };
@@ -179,7 +180,7 @@ const download_1 = __nccwpck_require__(5933);
 const action_1 = __nccwpck_require__(9139);
 function run() {
     return __awaiter(this, void 0, void 0, function* () {
-        const { name, path, repo, token, tempDir } = (0, action_1.getConfig)();
+        const { name, path, repo, commitHash, token, tempDir } = (0, action_1.getConfig)();
         const octokit = github.getOctokit(token);
         const [owner, repoName] = repo.split('/');
         const res = yield octokit.rest.actions.listArtifactsForRepo({
@@ -189,7 +190,10 @@ function run() {
         if (res.status !== 200) {
             throw Error(`The github API returned a non-success code: ${res.status}`);
         }
-        const artifacts = res.data.artifacts;
+        let artifacts = res.data.artifacts;
+        if (commitHash) {
+            artifacts = artifacts.filter((artifact) => { var _a, _b; return (_b = (_a = artifact.workflow_run) === null || _a === void 0 ? void 0 : _a.head_sha) === null || _b === void 0 ? void 0 : _b.startsWith(commitHash); });
+        }
         const matching = artifacts.find((artifact) => artifact.name === name);
         if (!matching) {
             throw Error(`No artifact found in ${repo} with name '${name}'`);
