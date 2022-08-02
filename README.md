@@ -17,7 +17,7 @@ Use [actions/upload-artifact](https://github.com/actions/upload-artifact) as nor
 
 See [action.yml](https://github.com/alextompkins/download-prior-artifact/blob/main/action.yml)
 
-Current repository (default):
+### Current repository (default):
 ```yaml
 steps:
   - uses: actions/checkout@v2
@@ -33,7 +33,7 @@ steps:
     run: ls -R
 ```
 
-Another repository:
+### Another repository:
 
 ```yaml
 steps:
@@ -50,5 +50,27 @@ steps:
   - name: Display structure of downloaded files
     run: ls -R
 ```
+For "Another repository" to work you must provide `GITHUB_TOKEN` with a token which has access to the given repo. The default `GITHUB_TOKEN` only has access to the repo it is running in. For reference, here is a link to github's security guide on [#using-encrypted-secrets-in-a-workflow](https://docs.github.com/en/actions/security-guides/encrypted-secrets#using-encrypted-secrets-in-a-workflow) 
 
-For this to work you must provide `GITHUB_TOKEN` with a token which has access to the given repo. The default `GITHUB_TOKEN` only has access to the repo it is running in.
+### Using optional commitHash filter:
+
+```yaml
+steps:
+  - uses: actions/checkout@v2
+
+  - uses: alextompkins/download-prior-artifact@v1
+    with:
+      name: my-artifact-id-123
+      path: path/to/artifact
+      commitHash: "7b7a14f"
+    env:
+      GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+  - name: Display structure of downloaded files
+    run: ls -R
+```
+The optional commitHash input filters the list of artifacts to ones that were generated for a particular commit hash. This is useful if your generated artifacts have the same name from one build to the next.  
+``` ts
+artifact.workflow_run?.head_sha?.startsWith(commitHash)
+```
+NOTE: the filter uses a startsWith to match so the full 40 character commit hash isn't nessasary 
