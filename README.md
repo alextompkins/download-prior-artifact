@@ -1,3 +1,7 @@
+# OBSOLETE
+
+This action is no longer maintained. Use [`gh run download`](https://cli.github.com/manual/gh_run_download) instead. 
+
 # GitHub Action: Download Prior Artifact
 <p>
   <a href="https://github.com/alextompkins/download-prior-artifact/actions">
